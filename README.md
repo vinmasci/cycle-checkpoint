@@ -2,49 +2,57 @@
 
 A React Native mobile app for organizing and tracking group bike rides.
 
-## Tech Stack
-- React Native with Expo
-- Firebase (Authentication, Realtime Database)
-- Material UI (React Native Paper)
+## Tech Stack & Dependencies
+- React Native with Expo (^49.0.0)
+- Firebase v10
+- React Native Paper v5
+- React Navigation v6
+- TypeScript v5
+- Expo Location
 
 ## Project Structure
 ```
 cycle-checkpoint/
 ├── src/
 │   ├── components/      # Reusable UI components
+│   │   ├── Button/     # Custom buttons
+│   │   ├── Card/       # Card components
+│   │   └── Form/       # Form components
 │   ├── screens/         # Screen components
+│   │   ├── auth/       # Authentication screens
+│   │   ├── organizer/  # Organizer-specific screens
+│   │   └── rider/      # Rider-specific screens
 │   ├── navigation/      # Navigation setup
 │   ├── services/        # Firebase services
-│   ├── hooks/           # Custom hooks
-│   ├── context/         # Context providers
-│   └── utils/           # Helper functions
+│   ├── hooks/          # Custom hooks
+│   ├── context/        # Context providers
+│   └── utils/          # Helper functions
 └── assets/             # Images, fonts, etc.
 ```
 
 ## Implementation Steps
 
 ### 1. Setup & Configuration (Week 1)
-- Initialize Expo project
-- Configure Firebase
-- Set up React Navigation
-- Install and configure React Native Paper
+- Initialize Expo project: `npx create-expo-app -t expo-template-typescript`
+- Configure Firebase: Set up Authentication and Realtime Database
+- Set up React Navigation: Install @react-navigation/native and @react-navigation/stack
+- Install React Native Paper: `npm install react-native-paper`
 
 ### 2. Authentication (Week 1-2)
-- Implement sign up/login screens
-- Add user role selection (Route Organizer/Rider)
-- Create user profile management
+- Implement sign up/login screens with email/password
+- Add user role selection during signup
+- Create user profile in Firebase
 
 ### 3. Route Organizer Features (Week 2-3)
-- Create ride creation form
-- Implement checkpoint management
-- Add rider list view
-- Build real-time tracking dashboard
+- Create ride form with: title, date, max riders
+- Add checkpoint management with map integration
+- Build real-time tracking dashboard using Firebase Realtime Database
 
 ### 4. Rider Features (Week 3-4)
-- Develop available rides list
-- Create ride registration
-- Implement checkpoint check-in system
-- Add real-time location tracking
+- List available rides with filtering
+- Implement one-click registration
+- Add location tracking with Expo Location
+- Build check-in system using geofencing
 
 ### 5. Data Models
 
@@ -54,6 +62,7 @@ interface User {
   email: string;
   name: string;
   role: 'organizer' | 'rider';
+  createdAt: number;
 }
 
 interface Ride {
@@ -61,8 +70,10 @@ interface Ride {
   organizerId: string;
   title: string;
   date: string;
+  maxRiders: number;
   checkpoints: Checkpoint[];
   riders: string[];
+  status: 'upcoming' | 'active' | 'completed';
 }
 
 interface Checkpoint {
@@ -72,6 +83,7 @@ interface Checkpoint {
     latitude: number;
     longitude: number;
   };
+  radiusMeters: number;  // Geofence radius
 }
 
 interface CheckIn {
@@ -85,36 +97,73 @@ interface CheckIn {
 }
 ```
 
-### 6. Key Features
+### 6. Firebase Structure
+```
+/users
+  /{userId}
+    - email
+    - name
+    - role
+    - createdAt
 
-#### Route Organizer
-- Create/manage rides
-- Set checkpoints
-- View rider check-ins
-- Real-time rider tracking
-
-#### Rider
-- Browse/join rides
-- View checkpoint locations
-- Check in at checkpoints
-- Share location with organizer
+/rides
+  /{rideId}
+    - organizerId
+    - title
+    - date
+    - maxRiders
+    - status
+    /checkpoints
+      /{checkpointId}
+        - name
+        - location
+        - radiusMeters
+    /riders
+      /{riderId}
+        - joinedAt
+    /checkins
+      /{checkpointId}
+        /{riderId}
+          - timestamp
+          - location
+```
 
 ### 7. Development Guidelines
-- Use TypeScript for type safety
-- Implement proper error handling
-- Add loading states
-- Include form validation
+- Use TypeScript strict mode
+- Implement proper error boundaries
+- Add loading states using React Suspense
+- Include form validation with Formik
 - Follow Material Design guidelines
-- Write unit tests for critical features
+- Write Jest tests for critical features
 
 ### 8. Testing & Deployment (Week 4-5)
-- Write unit tests
-- Perform end-to-end testing
+- Write unit tests with Jest and React Testing Library
+- E2E testing with Detox
+- Build with EAS Build
 - Deploy to App Store and Play Store
 
 ## Getting Started
 
 1. Clone repository
 2. Install dependencies: `npm install`
-3. Set up Firebase config
-4. Start development server: `expo start`
+3. Create Firebase project and add config to `.env`:
+```
+FIREBASE_API_KEY=xxx
+FIREBASE_AUTH_DOMAIN=xxx
+FIREBASE_PROJECT_ID=xxx
+FIREBASE_STORAGE_BUCKET=xxx
+FIREBASE_MESSAGING_SENDER_ID=xxx
+FIREBASE_APP_ID=xxx
+```
+4. Start development: `expo start`
+
+## Key Files to Create First
+1. `src/services/firebase.ts` - Firebase configuration
+2. `src/navigation/AppNavigator.tsx` - Navigation setup
+3. `src/screens/auth/SignUpScreen.tsx` - User registration
+4. `src/context/AuthContext.tsx` - Authentication state
+
+## Common Issues & Solutions
+1. Location permission errors: Request permissions before accessing location
+2. Firebase initialization: Ensure config matches .env exactly
+3. TypeScript path aliases: Configure in tsconfig.json
