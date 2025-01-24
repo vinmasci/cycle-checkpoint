@@ -16,9 +16,9 @@
 - Rider dashboard
 - Create ride screen with map integration
 - Ride details screen with check-in functionality
+- Ride tracking screen with real-time progress monitoring
 
 ### In Progress 🚧
-- [ ] Ride tracking
 - [ ] Check-in notifications
 
 ### Up Next 📅
@@ -34,6 +34,5 @@
 
 ## Notes for AI Assistants 🤖
 - Last Updated: 2025-01-24
-- Current Focus: Core functionality complete, moving to testing and polish
-- Next Action: Implement ride tracking for organizers
-- Dependencies all configured and working
+- Current Focus: Core functionality complete, adding notifications
+- Next Action: Implement check-in notifications for organizers
