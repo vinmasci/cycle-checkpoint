@@ -1,25 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
+import { TextInput, Button, Text, Banner } from 'react-native-paper';
 import { useAuth } from '../../context/AuthContext';
+import { errorService } from '../../services/error';
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { signIn } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { signIn, error, clearError } = useAuth();
+
+  useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, []);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      return;
+    }
+
     try {
-      setError('');
+      setLoading(true);
       await signIn(email, password);
-    } catch (err) {
-      setError('Failed to log in. Please check your credentials.');
+    } catch (err: any) {
+      // Error is handled by AuthContext
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
+      <Banner
+        visible={!!error}
+        actions={[
+          {
+            label: 'Dismiss',
+            onPress: clearError,
+          },
+        ]}
+      >
+        {error}
+      </Banner>
+
       <Text variant="headlineMedium" style={styles.title}>
         Cycle Checkpoint
       </Text>
@@ -31,6 +56,9 @@ export default function LoginScreen({ navigation }: any) {
         mode="outlined"
         style={styles.input}
         autoCapitalize="none"
+        keyboardType="email-address"
+        error={!!error && errorService.isAuthError(error)}
+        disabled={loading}
       />
 
       <TextInput
@@ -40,11 +68,17 @@ export default function LoginScreen({ navigation }: any) {
         mode="outlined"
         style={styles.input}
         secureTextEntry
+        error={!!error && errorService.isAuthError(error)}
+        disabled={loading}
       />
 
-      {error && <Text style={styles.error}>{error}</Text>}
-
-      <Button mode="contained" onPress={handleLogin} style={styles.button}>
+      <Button 
+        mode="contained" 
+        onPress={handleLogin} 
+        style={styles.button}
+        loading={loading}
+        disabled={loading || !email || !password}
+      >
         Login
       </Button>
 
@@ -52,6 +86,7 @@ export default function LoginScreen({ navigation }: any) {
         mode="text" 
         onPress={() => navigation.navigate('SignUp')}
         style={styles.link}
+        disabled={loading}
       >
         Create Account
       </Button>
@@ -75,10 +110,6 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     padding: 5,
-  },
-  error: {
-    color: 'red',
-    marginBottom: 10,
   },
   link: {
     marginTop: 15,
